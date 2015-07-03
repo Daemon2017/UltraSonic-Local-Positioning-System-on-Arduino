@@ -40,6 +40,8 @@ void loop()
           
       data_x.time_x = time_x;
        
+      delay(250); 
+       
       et_x.sendData(8); 
     }   
 }

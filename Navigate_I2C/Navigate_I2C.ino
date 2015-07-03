@@ -64,19 +64,31 @@ void setup()
 void loop() 
 {        
   getTemp();
+  
+  Serial.println("V");
+  
+  delayMicroseconds(wait);
+  
+  digitalWrite(sync_x, HIGH);  
+  digitalWrite(sync_y, HIGH); 
+  delayMicroseconds(5);
+  digitalWrite(sync_x, LOW); 
+  digitalWrite(sync_y, LOW); 
+  
   getCoordO();
-  delay(200);
-  getCoordX();
-  delay(200);
   getCoordY();
-  delay(200);
+  delay(250);
+  getCoordX();
+  
   trilateration();
+  
+  delay(500);
 }
 
 void led()
 {
   digitalWrite(LED, HIGH);
-  delayMicroseconds(50);
+  delayMicroseconds(10);
   digitalWrite(LED, LOW); 
 }
 
@@ -88,11 +100,7 @@ void getTemp()
 }
 
 void getCoordO()
-{
-  robotSync();
-  
-  delayMicroseconds(wait);
-  
+{  
   digitalWrite(sputnic_T_1, HIGH);  
   delayMicroseconds(10);
   digitalWrite(sputnic_T_1, LOW);
@@ -103,8 +111,6 @@ void getCoordO()
 
 void getCoordX()
 {
-  sendWave(1);    
-  
   if(et_x.receiveData())
   {                 
     r2 = calc(1);
@@ -114,37 +120,11 @@ void getCoordX()
 
 void getCoordY()
 { 
-  sendWave(2);  
-  
   if(et_y.receiveData())
   {                 
     r3 = calc(2);
     led();
    }      
-}
-
-void sendWave(int number)
-{      
-  float sync;
-  
-  switch (number)
-  {
-    case 1:
-    sync = sync_x;
-    break;
-    
-    case 2:
-    sync = sync_y;
-    break;
-  }     
-  
-  robotSync();
-  
-  delayMicroseconds(wait);
-  
-  digitalWrite(sync, HIGH);  
-  delayMicroseconds(10);
-  digitalWrite(sync, LOW); 
 }
 
 float calc(int peremennaja)
@@ -169,18 +149,13 @@ void trilateration()
   y = ( pow(r1, 2) - pow(r2, 2) + pow(quad, 2) ) / ( 2 * quad );  
   z = sqrt( pow(r1, 2) - pow(x, 2) - pow(y, 2) );
   
-  data_z.r1 = r1;  
+  data_z.r1 = r1;
   data_z.r2 = r2;
-  data_z.r3 = r3; 
+  data_z.r3 = r3;
   data_z.x = x;  
   data_z.y = y;
   data_z.z = z;   
   et_z.sendData(11); 
-}
-
-void robotSync()
-{
-  Serial.println("V");
 }
 
 void receive(int numBytes) {}

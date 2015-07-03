@@ -31,15 +31,15 @@ void loop()
 {              
     if(digitalRead(8) == HIGH)
     {  
-      digitalWrite(sputnic_T_2, HIGH);   
       digitalWrite(13, HIGH);
+      digitalWrite(sputnic_T_2, HIGH);       
       delayMicroseconds(10);
       digitalWrite(sputnic_T_2, LOW);       
       time_y = pulseIn(sputnic_E_2, HIGH);
       digitalWrite(13, LOW);  
           
       data_y.time_y = time_y;
-       
+             
       et_y.sendData(8);       
     }   
 }
