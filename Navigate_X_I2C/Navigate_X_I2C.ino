@@ -8,40 +8,47 @@ struct SEND_DATA_STRUCTURE_X
 };
 SEND_DATA_STRUCTURE_X data_x;
 
-#define sputnic_T_2 11
-#define sputnic_E_2 12
+#define TRIG 11
+#define ECHO 12
+
+#define MY_ADDR 9
+#define MASTER_ADDR 8
+
+#define SYNC_X 7
+
+#define LED 13
 
 float time_x;
 
 void setup() 
 {
-  Wire.begin(9);
+  Wire.begin(MY_ADDR);
   
   et_x.begin(details(data_x), &Wire);
   
-  pinMode(sputnic_T_2, OUTPUT); 
-  pinMode(sputnic_E_2, INPUT); 
+  pinMode(TRIG, OUTPUT); 
+  pinMode(ECHO, INPUT); 
   
-  pinMode(7, INPUT);
+  pinMode(SYNC_X, INPUT);
   
-  pinMode(13, OUTPUT);
+  pinMode(LED, OUTPUT);
 }
 
 void loop() 
 {              
-    if(digitalRead(7) == HIGH)
+    if(digitalRead(SYNC_X) == HIGH)
     {  
-      digitalWrite(sputnic_T_2, HIGH);   
-      digitalWrite(13, HIGH);
+      digitalWrite(TRIG, HIGH);   
+      digitalWrite(LED, HIGH);
       delayMicroseconds(10);
-      digitalWrite(sputnic_T_2, LOW);         
-      time_x = pulseIn(sputnic_E_2, HIGH);
-      digitalWrite(13, LOW);  
+      digitalWrite(TRIG, LOW);         
+      time_x = pulseIn(ECHO, HIGH);
+      digitalWrite(LED, LOW);  
           
-      data_x.time_x = time_x;
+      data_x.time_x = time_x / 1000000;
        
       delay(250); 
        
-      et_x.sendData(8); 
+      et_x.sendData(MASTER_ADDR); 
     }   
 }

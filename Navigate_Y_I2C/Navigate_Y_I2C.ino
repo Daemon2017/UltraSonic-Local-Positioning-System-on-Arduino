@@ -8,38 +8,45 @@ struct SEND_DATA_STRUCTURE_Y
 };
 SEND_DATA_STRUCTURE_Y data_y;
 
-#define sputnic_T_2 11
-#define sputnic_E_2 12
+#define TRIG 11
+#define ECHO 12
+
+#define MY_ADDR 10
+#define MASTER_ADDR 8
+
+#define SYNC_Y 8
+
+#define LED 13
 
 float time_y;
 
 void setup() 
 {
-  Wire.begin(10);
+  Wire.begin(MY_ADDR);
   
   et_y.begin(details(data_y), &Wire);
   
-  pinMode(sputnic_T_2, OUTPUT); 
-  pinMode(sputnic_E_2, INPUT); 
+  pinMode(TRIG, OUTPUT); 
+  pinMode(ECHO, INPUT); 
   
-  pinMode(8, INPUT);
+  pinMode(SYNC_Y, INPUT);
   
-  pinMode(13, OUTPUT);
+  pinMode(LED, OUTPUT);
 }
 
 void loop() 
 {              
-    if(digitalRead(8) == HIGH)
+    if(digitalRead(SYNC_Y) == HIGH)
     {  
-      digitalWrite(13, HIGH);
-      digitalWrite(sputnic_T_2, HIGH);       
+      digitalWrite(LED, HIGH);
+      digitalWrite(TRIG, HIGH);       
       delayMicroseconds(10);
-      digitalWrite(sputnic_T_2, LOW);       
-      time_y = pulseIn(sputnic_E_2, HIGH);
-      digitalWrite(13, LOW);  
+      digitalWrite(TRIG, LOW);       
+      time_y = pulseIn(ECHO, HIGH);
+      digitalWrite(LED, LOW);  
           
-      data_y.time_y = time_y;
+      data_y.time_y = time_y / 1000000;
              
-      et_y.sendData(8);       
+      et_y.sendData(MASTER_ADDR);       
     }   
 }

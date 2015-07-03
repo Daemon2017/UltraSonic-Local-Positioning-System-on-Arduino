@@ -26,16 +26,18 @@ struct SEND_DATA_STRUCTURE_Z
 SEND_DATA_STRUCTURE_Z data_z;
 
 //Разъемы подключения спутника
-#define sputnic_T_1 3
-#define sputnic_E_1 2
+#define TRIG 3
+#define ECHO 2
 
 //Разъемы синхросигналов
-#define sync_x 7
-#define sync_y 8
+#define SYNC_X 7
+#define SYNC_Y 8
 
 #define LED 13
 
-#define wait 874
+#define WAIT 874
+
+#define MY_ADDR 8
 
 float sonic, coordinate, quad = 0.45;
 float r1, r2, r3;
@@ -45,18 +47,18 @@ void setup()
 {
   Serial.begin(9600);  
   
-  Wire.begin(8);
+  Wire.begin(MY_ADDR);
   Wire.onReceive(receive); 
   
   et_x.begin(details(data_x), &Wire);
   et_y.begin(details(data_y), &Wire);
   et_z.begin(details(data_z), &Wire);
   
-  pinMode(sputnic_T_1, OUTPUT); 
-  pinMode(sputnic_E_1, INPUT); 
+  pinMode(TRIG, OUTPUT); 
+  pinMode(ECHO, INPUT); 
   
-  pinMode(sync_x, OUTPUT);
-  pinMode(sync_y, OUTPUT);
+  pinMode(SYNC_X, OUTPUT);
+  pinMode(SYNC_Y, OUTPUT);
   
   pinMode(LED, OUTPUT);
 }
@@ -67,13 +69,13 @@ void loop()
   
   Serial.println("V");
   
-  delayMicroseconds(wait);
+  delayMicroseconds(WAIT);
   
-  digitalWrite(sync_x, HIGH);  
-  digitalWrite(sync_y, HIGH); 
+  digitalWrite(SYNC_X, HIGH);  
+  digitalWrite(SYNC_Y, HIGH); 
   delayMicroseconds(5);
-  digitalWrite(sync_x, LOW); 
-  digitalWrite(sync_y, LOW); 
+  digitalWrite(SYNC_X, LOW); 
+  digitalWrite(SYNC_Y, LOW); 
   
   getCoordO();
   getCoordY();
@@ -101,11 +103,11 @@ void getTemp()
 
 void getCoordO()
 {  
-  digitalWrite(sputnic_T_1, HIGH);  
+  digitalWrite(TRIG, HIGH);  
   delayMicroseconds(10);
-  digitalWrite(sputnic_T_1, LOW);
+  digitalWrite(TRIG, LOW);
   
-  float time_base = pulseIn(sputnic_E_1, HIGH);  
+  float time_base = pulseIn(ECHO, HIGH);  
   r1 = time_base * sonic / 1000000;
 }
 
@@ -140,7 +142,7 @@ float calc(int peremennaja)
     data = data_y.time_y;
     break;
   }   
-  return distance = data * sonic / 1000000;
+  return distance = data * sonic;
 }
 
 void trilateration()
