@@ -2,46 +2,46 @@
 #include <EasyTransferI2C.h>
 
 EasyTransferI2C et_z; 
-struct SEND_DATA_STRUCTURE_Z
+struct RECEIVE_DATA_STRUCTURE_Z
 {
-  float time_z;
+  float x, y, z;
+  float r1, r2, r3;
 };
-SEND_DATA_STRUCTURE_Z data_z;
-
-#define sputnic_T_2 11
-#define sputnic_E_2 12
+RECEIVE_DATA_STRUCTURE_Z data_z;
 
 float time_z;
 
 void setup() 
 {
+  Serial.begin(9600);
+  
   Wire.begin(11);
+  Wire.onReceive(receive);
   
   et_z.begin(details(data_z), &Wire);
-  
-  pinMode(sputnic_T_2, OUTPUT); 
-  pinMode(sputnic_E_2, INPUT); 
-  
-  pinMode(9, INPUT);
-  
+    
   pinMode(13, OUTPUT);
 }
 
 void loop() 
 {              
-    if(digitalRead(9) == HIGH)
-    {  
-      digitalWrite(sputnic_T_2, HIGH);   
-      delayMicroseconds(10);
-      digitalWrite(sputnic_T_2, LOW);       
-      time_z = pulseIn(sputnic_E_2, HIGH);
-          
-      data_z.time_z = time_z;
-       
-      et_z.sendData(8); 
-      
-      digitalWrite(13, HIGH);
-      delay(200);
-      digitalWrite(13, LOW);  
-    }   
+  if(et_z.receiveData())
+  {    
+    Serial.print("r1: ");
+    Serial.println(data_z.r1, 3);
+    Serial.print("r2: ");
+    Serial.println(data_z.r2, 3);
+    Serial.print("r3: ");    
+    Serial.println(data_z.r3, 3);
+    
+    Serial.print("x: ");
+    Serial.println(data_z.x, 3);
+    Serial.print("y: ");
+    Serial.println(data_z.y, 3);
+    Serial.print("z: ");
+    Serial.println(data_z.z, 3);
+    Serial.println();
+  }
 }
+
+void receive(int numBytes) {}

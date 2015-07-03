@@ -17,6 +17,14 @@ struct RECEIVE_DATA_STRUCTURE_Y
 };
 RECEIVE_DATA_STRUCTURE_Y data_y;
 
+EasyTransferI2C et_z; 
+struct SEND_DATA_STRUCTURE_Z
+{
+  float x, y, z;
+  float r1, r2, r3;
+};
+SEND_DATA_STRUCTURE_Z data_z;
+
 //Разъемы подключения спутника
 #define sputnic_T_1 3
 #define sputnic_E_1 2
@@ -26,6 +34,8 @@ RECEIVE_DATA_STRUCTURE_Y data_y;
 #define sync_y 8
 
 #define LED 13
+
+#define wait 874
 
 float sonic, coordinate, quad = 0.45;
 float r1, r2, r3;
@@ -40,6 +50,7 @@ void setup()
   
   et_x.begin(details(data_x), &Wire);
   et_y.begin(details(data_y), &Wire);
+  et_z.begin(details(data_z), &Wire);
   
   pinMode(sputnic_T_1, OUTPUT); 
   pinMode(sputnic_E_1, INPUT); 
@@ -54,48 +65,49 @@ void loop()
 {        
   getTemp();
   getCoordO();
+  delay(200);
   getCoordX();
+  delay(200);
   getCoordY();
+  delay(200);
   trilateration();
 }
 
 void led()
 {
   digitalWrite(LED, HIGH);
-  delay(200);
+  delayMicroseconds(50);
   digitalWrite(LED, LOW); 
 }
 
 void getTemp()
 {
   float temperatureC = ((((analogRead(A1) * 5.0) / 1024.0) - 0.55) * 100);  
-  Serial.print("Degrees: ");
-  Serial.println(temperatureC); 
   
   sonic = sqrt(1.4 * 287 * (temperatureC + 273.15));
-  Serial.print("Sonic speed: ");
-  Serial.println(sonic); 
 }
 
 void getCoordO()
 {
-  digitalWrite(sputnic_T_1, HIGH);
   robotSync();
+  
+  delayMicroseconds(wait);
+  
+  digitalWrite(sputnic_T_1, HIGH);  
+  delayMicroseconds(10);
   digitalWrite(sputnic_T_1, LOW);
+  
   float time_base = pulseIn(sputnic_E_1, HIGH);  
   r1 = time_base * sonic / 1000000;
-  Serial.print("r1: ");
-  Serial.println(r1, 3);
 }
 
 void getCoordX()
 {
   sendWave(1);    
+  
   if(et_x.receiveData())
   {                 
     r2 = calc(1);
-    Serial.print("r2: ");
-    Serial.println(r2, 3);
     led();
    }  
 }
@@ -103,11 +115,10 @@ void getCoordX()
 void getCoordY()
 { 
   sendWave(2);  
+  
   if(et_y.receiveData())
   {                 
     r3 = calc(2);
-    Serial.print("r3: ");
-    Serial.println(r3, 3);
     led();
    }      
 }
@@ -115,6 +126,7 @@ void getCoordY()
 void sendWave(int number)
 {      
   float sync;
+  
   switch (number)
   {
     case 1:
@@ -125,8 +137,13 @@ void sendWave(int number)
     sync = sync_y;
     break;
   }     
-  digitalWrite(sync, HIGH);
+  
   robotSync();
+  
+  delayMicroseconds(wait);
+  
+  digitalWrite(sync, HIGH);  
+  delayMicroseconds(10);
   digitalWrite(sync, LOW); 
 }
 
@@ -147,23 +164,23 @@ float calc(int peremennaja)
 }
 
 void trilateration()
-{
-  x = ( pow(r1, 2) - pow(r2, 2) + pow(quad, 2) ) / ( 2 * quad );
-  Serial.print("x: ");
-  Serial.println(x, 3);
-  
-  y = ( pow(r1, 2) - pow(r3, 2) + pow(quad, 2) ) / ( 2 * quad );
-  Serial.print("y: ");
-  Serial.println(y, 3);
-  
+{  
+  x = ( pow(r1, 2) - pow(r3, 2) + pow(quad, 2) ) / ( 2 * quad );  
+  y = ( pow(r1, 2) - pow(r2, 2) + pow(quad, 2) ) / ( 2 * quad );  
   z = sqrt( pow(r1, 2) - pow(x, 2) - pow(y, 2) );
-  Serial.print("z: ");
-  Serial.println(z, 3);
+  
+  data_z.r1 = r1;  
+  data_z.r2 = r2;
+  data_z.r3 = r3; 
+  data_z.x = x;  
+  data_z.y = y;
+  data_z.z = z;   
+  et_z.sendData(11); 
 }
 
 void robotSync()
 {
-  Serial.println(123);
+  Serial.println("V");
 }
 
 void receive(int numBytes) {}

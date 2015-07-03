@@ -4,8 +4,6 @@
 #define client_T 11
 #define client_E 12
 
-int robotSync;
-
 void setup() 
 {
   Serial.begin(9600);
@@ -20,16 +18,14 @@ void loop()
 {
   if(Serial.available())
   {
-    robotSync = Serial.read();
+    int robotSync = Serial.read();
     
-    if (robotSync == 123)
-    {
+    if (robotSync == 'V')
+    {   
       digitalWrite(client_T, HIGH);
+      digitalWrite(LED, HIGH);
       delayMicroseconds(10);
       digitalWrite(client_T, LOW);
-      
-      digitalWrite(LED, HIGH);
-      delay(100);
       digitalWrite(LED, LOW); 
     }
   }

@@ -32,16 +32,14 @@ void loop()
     if(digitalRead(7) == HIGH)
     {  
       digitalWrite(sputnic_T_2, HIGH);   
+      digitalWrite(13, HIGH);
       delayMicroseconds(10);
-      digitalWrite(sputnic_T_2, LOW);       
+      digitalWrite(sputnic_T_2, LOW);         
       time_x = pulseIn(sputnic_E_2, HIGH);
+      digitalWrite(13, LOW);  
           
       data_x.time_x = time_x;
        
       et_x.sendData(8); 
-      
-      digitalWrite(13, HIGH);
-      delay(200);
-      digitalWrite(13, LOW);  
     }   
 }
