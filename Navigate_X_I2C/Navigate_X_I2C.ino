@@ -37,18 +37,20 @@ void setup()
 void loop() 
 {              
     if(digitalRead(SYNC_X) == HIGH)
-    {  
+    {      
       digitalWrite(TRIG, HIGH);   
-      digitalWrite(LED, HIGH);
       delayMicroseconds(10);
       digitalWrite(TRIG, LOW);         
       time_x = pulseIn(ECHO, HIGH);
-      digitalWrite(LED, LOW);  
-          
+      
       data_x.time_x = time_x / 1000000;
        
-      delay(250); 
+      while(digitalRead(SYNC_X) == LOW)
+      {       
+        digitalWrite(LED, HIGH);      
+      }
+       et_x.sendData(MASTER_ADDR); 
        
-      et_x.sendData(MASTER_ADDR); 
+       digitalWrite(LED, LOW);        
     }   
 }

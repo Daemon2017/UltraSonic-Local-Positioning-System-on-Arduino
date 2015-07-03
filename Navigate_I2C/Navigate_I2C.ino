@@ -39,7 +39,9 @@ SEND_DATA_STRUCTURE_Z data_z;
 
 #define MY_ADDR 8
 
-float sonic, coordinate, quad = 0.45;
+#define RETRANS_ADDR 11
+
+float sonic, coordinate, quad_x = 0.425, quad_y = 0.455;
 float r1, r2, r3;
 float x, y, z;
 
@@ -67,30 +69,29 @@ void loop()
 {        
   getTemp();
   
-  Serial.println("V");
-  
-  delayMicroseconds(WAIT);
-  
-  digitalWrite(SYNC_X, HIGH);  
-  digitalWrite(SYNC_Y, HIGH); 
-  delayMicroseconds(5);
-  digitalWrite(SYNC_X, LOW); 
-  digitalWrite(SYNC_Y, LOW); 
+  sync();
   
   getCoordO();
+  
+  digitalWrite(SYNC_X, HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(SYNC_X, LOW);
+  delay(50);
+  getCoordX(); 
+     
+  digitalWrite(SYNC_Y, HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(SYNC_Y, LOW);
+  delay(50);
   getCoordY();
-  delay(250);
-  getCoordX();
   
-  trilateration();
-  
-  delay(500);
+  trilateration();  
 }
 
 void led()
 {
   digitalWrite(LED, HIGH);
-  delayMicroseconds(10);
+  delay(10);
   digitalWrite(LED, LOW); 
 }
 
@@ -99,6 +100,19 @@ void getTemp()
   float temperatureC = ((((analogRead(A1) * 5.0) / 1024.0) - 0.55) * 100);  
   
   sonic = sqrt(1.4 * 287 * (temperatureC + 273.15));
+}
+
+void sync()
+{
+  Serial.println("V");
+  
+  delayMicroseconds(WAIT);
+  
+  digitalWrite(SYNC_X, HIGH);  
+  digitalWrite(SYNC_Y, HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(SYNC_X, LOW); 
+  digitalWrite(SYNC_Y, LOW); 
 }
 
 void getCoordO()
@@ -147,8 +161,8 @@ float calc(int peremennaja)
 
 void trilateration()
 {  
-  x = ( pow(r1, 2) - pow(r3, 2) + pow(quad, 2) ) / ( 2 * quad );  
-  y = ( pow(r1, 2) - pow(r2, 2) + pow(quad, 2) ) / ( 2 * quad );  
+  x = ( pow(r1, 2) - pow(r2, 2) + pow(quad_x, 2) ) / ( 2 * quad_x );  
+  y = ( pow(r1, 2) - pow(r3, 2) + pow(quad_y, 2) ) / ( 2 * quad_y );  
   z = sqrt( pow(r1, 2) - pow(x, 2) - pow(y, 2) );
   
   data_z.r1 = r1;
@@ -157,7 +171,7 @@ void trilateration()
   data_z.x = x;  
   data_z.y = y;
   data_z.z = z;   
-  et_z.sendData(11); 
+  et_z.sendData(RETRANS_ADDR); 
 }
 
 void receive(int numBytes) {}

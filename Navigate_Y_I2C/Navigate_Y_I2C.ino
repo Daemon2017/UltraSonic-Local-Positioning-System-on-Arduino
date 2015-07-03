@@ -38,15 +38,19 @@ void loop()
 {              
     if(digitalRead(SYNC_Y) == HIGH)
     {  
-      digitalWrite(LED, HIGH);
       digitalWrite(TRIG, HIGH);       
       delayMicroseconds(10);
       digitalWrite(TRIG, LOW);       
       time_y = pulseIn(ECHO, HIGH);
-      digitalWrite(LED, LOW);  
-          
-      data_y.time_y = time_y / 1000000;
-             
-      et_y.sendData(MASTER_ADDR);       
+                
+      data_y.time_y = time_y / 1000000;       
+                   
+      while(digitalRead(SYNC_Y) == LOW)
+      {    
+        digitalWrite(LED, HIGH);
+      }
+      et_y.sendData(MASTER_ADDR);
+      
+      digitalWrite(LED, LOW);
     }   
 }
