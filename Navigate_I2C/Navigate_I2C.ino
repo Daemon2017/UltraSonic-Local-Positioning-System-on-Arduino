@@ -38,7 +38,8 @@ RECEIVE_DATA_STRUCTURE_Z data_z;
 #define sync_y 8
 #define sync_z 9
 
-float sonic, distance_base, coordinate, true_coord;
+float sonic, coordinate, quad = 0.45;
+float r1, r2, r3, r4;
 float x, y, z;
 
 void setup() 
@@ -65,10 +66,15 @@ void setup()
 void loop() 
 {        
   getTemp();
-  getBase();
-  getCoordY();
+  delay (3000);
   getCoordZ();  
+  delay (3000);
+  getBase();
+  delay (3000);
   getCoordX();
+  getCoordY();
+  delay (3000);
+  trilateration();
   delay (1500);
 }
 
@@ -106,14 +112,12 @@ void led()
 void getTemp()
 {
   float temperatureC = ((((analogRead(A1) * 5.0) / 1024.0) - 0.55) * 100);  
-  Serial.println(" "); 
   Serial.print("Degrees: ");
-  Serial.print(temperatureC); 
+  Serial.println(temperatureC); 
   
   sonic = sqrt(1.4 * 287 * (temperatureC + 273.15));
-  Serial.println(" "); 
   Serial.print("Sonic speed: ");
-  Serial.print(sonic); 
+  Serial.println(sonic); 
 }
 
 void getBase()
@@ -122,8 +126,9 @@ void getBase()
   getPriem();
   digitalWrite(sputnic_T_1, LOW);
   float time_base = pulseIn(sputnic_E_1, HIGH);  
-  distance_base = time_base * sonic / 1000000;
-  Serial.println(" ");  
+  r1 = time_base * sonic / 1000000;
+  Serial.print("r1(O): ");
+  Serial.println(r1, 3);
 }
 
 void getPriem()
@@ -138,10 +143,9 @@ void getCoordX()
   sendWave(1);    
   if(et_x.receiveData())
   {                 
-    x = calc(1);
-    Serial.print("Z: ");
-    Serial.print(x, 3);
-    Serial.println(" ");        
+    r2 = calc(1);
+    Serial.print("r2: ");
+    Serial.println(r2, 3);
     led();
    }  
 }
@@ -151,14 +155,9 @@ void getCoordY()
   sendWave(2);  
   if(et_y.receiveData())
   {                 
-    y = calc(2);
-    Serial.print("X: ");
-    Serial.print(y, 3);
-    Serial.println(" "); 
-    trueCalc(1);
-    Serial.print("X_true: ");
-    Serial.print(true_coord, 3);
-    Serial.println(" ");    
+    r3 = calc(2);
+    Serial.print("r3(X): ");
+    Serial.println(r3, 3);
     led();
    }      
 }
@@ -168,21 +167,16 @@ void getCoordZ()
   sendWave(3);   
   if(et_z.receiveData())
   {                    
-    z = calc(3); 
-    Serial.print("Y: ");
-    Serial.print(z, 3);
-    Serial.println(" ");      
-    trueCalc(2);
-    Serial.print("Y_true: ");
-    Serial.print(true_coord, 3);
-    Serial.println(" ");   
+    r4 = calc(3); 
+    Serial.print("r4(Y): ");
+    Serial.println(r4, 3);
     led();
    }     
 }
 
 float calc(int peremennaja)
 {
-  float data, quad = 0.45;
+  float data, distance;
   switch (peremennaja)
   {
     case 1:
@@ -197,27 +191,22 @@ float calc(int peremennaja)
     data = data_z.time_z;
     break;
   }   
-  Serial.println(" ");    
-  float distance = data * sonic / 1000000;
-  float Sp = (quad + distance_base + distance) / 2;
-  float Ar = sqrt(Sp * (Sp - quad) * (Sp - distance_base) * (Sp - distance));
-  return coordinate = Ar / (quad / 2);
+  return distance = data * sonic / 1000000;
 }
 
-float trueCalc(int znachenie)
+void trilateration()
 {
-  float coordinata;
-  switch (znachenie)
-  {
-    case 1:
-    coordinata = y;
-    break;
-    
-    case 2:
-    coordinata = z;
-    break;
-  } 
-  return true_coord = sqrt(pow(coordinata, 2) - pow(x, 2));   
+  x = ( pow(r1, 2) - pow(r3, 2) + pow(quad, 2) ) / ( 2 * quad );
+  Serial.print("x: ");
+  Serial.println(x, 3);
+  
+  y = ( pow(r1, 2) - pow(r4, 2) + pow(quad, 2) ) / ( 2 * quad );
+  Serial.print("y: ");
+  Serial.println(y, 3);
+  
+  z = sqrt( pow(r1, 2) - pow(x, 2) - pow(y, 2) );
+  Serial.print("z: ");
+  Serial.println(z, 3);
 }
 
 void receive(int numBytes) {}
