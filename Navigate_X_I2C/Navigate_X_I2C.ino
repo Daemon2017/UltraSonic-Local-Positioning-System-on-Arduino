@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <EasyTransferI2C.h>
 
-EasyTransferI2C ET_X; 
+EasyTransferI2C et_x; 
 struct SEND_DATA_STRUCTURE_X
 {
   float time_x;
@@ -17,7 +17,7 @@ void setup()
 {
   Wire.begin(9);
   
-  ET_X.begin(details(data_x), &Wire);
+  et_x.begin(details(data_x), &Wire);
   
   pinMode(sputnic_T_2, OUTPUT); 
   pinMode(sputnic_E_2, INPUT); 
@@ -38,7 +38,7 @@ void loop()
           
       data_x.time_x = time_x;
        
-      ET_X.sendData(8); 
+      et_x.sendData(8); 
       
       digitalWrite(13, HIGH);
       delay(200);
