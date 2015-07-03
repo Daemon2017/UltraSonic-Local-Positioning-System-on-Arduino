@@ -13,12 +13,9 @@ SEND_DATA_STRUCTURE_X data_x;
 
 float time_x;
 
-#define I2C_SLAVE_ADDRESS2 8
-#define I2C_SLAVE_ADDRESS 9
-
 void setup() 
 {
-  Wire.begin(I2C_SLAVE_ADDRESS);
+  Wire.begin(9);
   
   ET_X.begin(details(data_x), &Wire);
   
@@ -41,7 +38,7 @@ void loop()
           
       data_x.time_x = time_x;
        
-      ET_X.sendData(I2C_SLAVE_ADDRESS2); 
+      ET_X.sendData(8); 
       
       digitalWrite(13, HIGH);
       delay(200);
